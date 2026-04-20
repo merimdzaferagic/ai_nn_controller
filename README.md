@@ -10,7 +10,7 @@ See COMMERCIAL-LICENSE.md for terms summary.
 
 # AI-Native Network Controller
 
-**ai_nn_controller** is an open-source, AI-native network controller framework — the OpenClaw for networks — for building intelligent control applications that manage heterogeneous network equipment. It supports any type of network node — optical, wireless, RAN, core network, and beyond — through a unified control plane, a ZeroMQ-based message bus, and an automatic MCP (Model Context Protocol) layer that exposes every control capability to AI agents.
+**AI-Native Network Controller** is an open-source, AI-native network controller framework — the OpenClaw for networks — for building intelligent control applications that manage heterogeneous network equipment. It supports any type of network node — optical, wireless, RAN, core network, and beyond — through a unified control plane, a ZeroMQ-based message bus, and an automatic MCP (Model Context Protocol) layer that exposes every control capability to AI agents.
 
 
 ## Running the Examples
