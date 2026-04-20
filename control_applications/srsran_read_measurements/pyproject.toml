@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "srsran-read-measurements"
+version = "0.1.0"
+description = "srsRAN read measurements control application for ai_nn_controller"
+requires-python = ">=3.9"
+dependencies = ["ai_nn_controller>=1.0.0"]
+
+[project.entry-points."ai_nn_controller.app_init"]
+"srsran_read_measurements:aic_app:commands" = "ai_nn_controller.plugins.entrypoints:bootstrap_application_bundle"
+
+[tool.setuptools]
+py-modules = ["aic_app", "commands"]

@@ -1,0 +1,126 @@
+# Docker Compose for ai_nn_controller + srsRAN integration.
+# Requires an active srsRAN deployment with InfluxDB on the docker_metrics network.
+# Run: docker compose -f docker-compose.srsran.yml up -d
+
+services:
+  # Redis database for state
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - aic_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Register service - handles node and app registration
+  aic_register:
+    container_name: aic_register
+    build:
+      context: ./controller_components/register/
+      dockerfile: Dockerfile
+    volumes:
+      - ./controller_components/register/:/register
+      - ./control_applications/:/control_applications
+      - ./:/workspace
+    tty: true
+    stdin_open: true
+    command: python3 register.py
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - aic_network
+    ports:
+      - "5558:5558"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Message broker
+  node_msg_broker:
+    container_name: node_msg_broker
+    build:
+      context: ./controller_components/node_msg_broker/
+      dockerfile: Dockerfile
+    volumes:
+      - ./controller_components/node_msg_broker/:/node_msg_broker
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+    networks:
+      - aic_network
+    ports:
+      - "5554:5554"
+      - "5555:5555"
+      - "5557:5557"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # srsRAN Node (node_id=10)
+  # Polls InfluxDB for srsRAN metrics and forwards them through the message bus.
+  # Requires docker_metrics network (created by the srsRAN docker-compose stack).
+  srsran_node:
+    container_name: srsran_node
+    build:
+      context: ./
+      dockerfile: network_nodes/srsran_node/Dockerfile
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+      - docker_metrics
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # srsRAN Reader — subscribes to node 10 measurements, exposes REST + MCP
+  srsran_reader:
+    container_name: srsran_reader
+    build:
+      context: ./
+      dockerfile: control_applications/srsran_read_measurements/Dockerfile
+    volumes:
+      - ./control_applications/srsran_read_measurements/:/app
+      - ./controller_components/ai_nn_controller/:/ai_nn_controller
+    ports:
+      - "8000:8000"
+    networks:
+      - aic_network
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "sleep 25 && pip install --no-cache-dir /ai_nn_controller && pip install --no-cache-dir /app && python3 aic_app.py --verbose"
+
+  # FastAPI client interface
+  fastapi_client:
+    container_name: fastapi_client
+    build:
+      context: ./fastapi_client/
+      dockerfile: Dockerfile
+    volumes:
+      - ./fastapi_client/:/app
+    networks:
+      - aic_network
+    depends_on:
+      - srsran_reader
+    tty: true
+    stdin_open: true
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: "/bin/bash"
+
+networks:
+  aic_network:
+    driver: bridge
+  docker_metrics:
+    external: true  # Created by the srsRAN docker-compose stack

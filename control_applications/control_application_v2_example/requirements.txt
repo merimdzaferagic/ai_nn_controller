@@ -1,0 +1,5 @@
+pyzmq
+fastapi
+uvicorn[standard]
+pydantic
+sse-starlette  # For SSE support in MCP endpoints

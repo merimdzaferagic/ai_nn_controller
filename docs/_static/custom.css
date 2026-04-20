@@ -1,0 +1,111 @@
+/* Custom CSS for AI Native Network Controller Documentation */
+
+/* Improve code block readability */
+.highlight pre {
+    font-size: 0.85em;
+    line-height: 1.5;
+}
+
+/* Better table styling */
+table.docutils {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.docutils td, table.docutils th {
+    padding: 8px 12px;
+    border: 1px solid #e1e4e5;
+}
+
+table.docutils th {
+    background-color: #f3f6f6;
+    font-weight: bold;
+}
+
+/* Improve admonition styling */
+.admonition {
+    margin: 1em 0;
+    padding: 12px;
+    border-radius: 4px;
+}
+
+.admonition-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+/* Note styling */
+.admonition.note {
+    background-color: #e7f2fa;
+    border-left: 4px solid #6ab0de;
+}
+
+/* Warning styling */
+.admonition.warning {
+    background-color: #ffedcc;
+    border-left: 4px solid #f0b37e;
+}
+
+/* Tip styling */
+.admonition.tip {
+    background-color: #dbfaf4;
+    border-left: 4px solid #1abc9c;
+}
+
+/* API documentation styling */
+.py.class dt,
+.py.function dt,
+.py.method dt {
+    background-color: #f8f8f8;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+/* Improve sidebar navigation */
+.wy-nav-side {
+    background-color: #343131;
+}
+
+.wy-side-nav-search {
+    background-color: #2980b9;
+}
+
+/* Better link styling in content */
+.wy-body-for-nav a {
+    color: #2980b9;
+}
+
+.wy-body-for-nav a:hover {
+    color: #3091d1;
+}
+
+/* Code inline styling */
+code.literal {
+    background-color: #f5f5f5;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* HTTP method badges */
+.http.get .pre,
+.http.post .pre,
+.http.put .pre,
+.http.delete .pre {
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 768px) {
+    .wy-nav-content {
+        padding: 1em;
+    }
+
+    table.docutils {
+        font-size: 0.85em;
+    }
+}

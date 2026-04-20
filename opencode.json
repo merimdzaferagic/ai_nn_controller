@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "aic-controller": {
+      "type": "local",
+      "command": ["python3", "mcp_http_proxy.py", "--url", "http://localhost:8000/mcp"],
+      "enabled": true
+    }
+  }
+}
