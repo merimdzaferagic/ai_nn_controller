@@ -1,0 +1,271 @@
+version: "3.8"
+
+# Docker Compose configuration for the ai_nn_controller framework
+# This version uses the new registry-based command system where:
+# - ai_nn_controller is a generic, reusable framework (like numpy/sklearn)
+# - commands.py contains specific command definitions
+# - Commands are registered at runtime via the registry API
+
+services:
+  # Redis database for state
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - aic_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Register service - handles node and app registration
+  aic_register:
+    container_name: aic_register
+    build:
+      context: ./controller_components/register/
+      dockerfile: Dockerfile
+    volumes:
+      - ./controller_components/register/:/register
+      - ./control_applications/:/control_applications
+      - ./:/workspace
+    tty: true
+    stdin_open: true
+    command: python3 register.py
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - aic_network
+    ports:
+      - "5558:5558"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Message broker
+  node_msg_broker:
+    container_name: node_msg_broker
+    build:
+      context: ./controller_components/node_msg_broker/
+      dockerfile: Dockerfile
+    volumes:
+      - ./controller_components/node_msg_broker/:/node_msg_broker
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+    networks:
+      - aic_network
+    ports:
+      - "5554:5554"
+      - "5555:5555"
+      - "5557:5557"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Amp1 Node (cell_id = 3)
+  amp1_node:
+    container_name: amp1_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/amp1_node/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/amp1_node/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # ROADM1 Node (cell_id = 4)
+  roadm1_node:
+    container_name: roadm1_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/roadm1_node/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/roadm1_node/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Amp2 Node (cell_id = 5)
+  amp2_node:
+    container_name: amp2_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/amp2_node/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/amp2_node/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # Amp3 Node (cell_id = 6)
+  amp3_node:
+    container_name: amp3_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/amp3_node/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/amp3_node/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # ROADM2 Node (cell_id = 7)
+  roadm2_node:
+    container_name: roadm2_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/roadm2_node/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/roadm2_node/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  # ROADM3 Node (cell_id = 8)
+  roadm3_node:
+    container_name: roadm3_node
+    build:
+      context: ./
+      dockerfile: network_nodes/dummy_nodes/roadm3_with_command/Dockerfile
+    volumes:
+      - ./network_nodes/dummy_nodes/roadm3_with_command/:/node
+    tty: true
+    stdin_open: true
+    depends_on:
+      - aic_register
+      - node_msg_broker
+    networks:
+      - aic_network
+    command: >
+      sh -c "sleep 5 && python3 node.py"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  ## srsRAN Node (cell_id = 10)
+  ## Polls InfluxDB for srsRAN metrics (same as Grafana) and forwards them through the ai_nn_controller message bus
+  #srsran_node:
+  #  container_name: srsran_node
+  #  build:
+  #    context: ./
+  #    dockerfile: network_nodes/srsran_node/Dockerfile
+  #  volumes:
+  #    - ./network_nodes/srsran_node/:/node
+  #  tty: true
+  #  stdin_open: true
+  #  depends_on:
+  #    - aic_register
+  #    - node_msg_broker
+  #  networks:
+  #    - aic_network
+  #    - docker_metrics  # Access InfluxDB on the srsRAN metrics network
+  #  command: >
+  #    sh -c "sleep 5 && python3 node.py"
+  #  environment:
+  #    - PYTHONUNBUFFERED=1
+
+  # AIC Application Server with FastAPI
+  # Runs aic_app.py which starts the controller with API via with_api=True
+  # Uses the new registry-based command system and ai_nn_controller package
+  aic_server:
+    container_name: aic_server
+    build:
+      context: ./
+      dockerfile: control_applications/control_application_v2_example/Dockerfile
+    volumes:
+      - ./control_applications/control_application_v2_example/:/app
+      - ./controller_components/ai_nn_controller/:/ai_nn_controller
+    ports:
+      - "8000:8000"  # Expose FastAPI on port 8000
+    networks:
+      - aic_network
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      sh -c "sleep 25 && pip install --no-cache-dir /ai_nn_controller && pip install --no-cache-dir /app && python3 aic_app.py --verbose"
+
+  ## srsRAN Read Measurements App
+  ## Subscribes to srsRAN node measurements and prints them
+  #srsran_reader:
+  #  container_name: srsran_reader
+  #  build:
+  #    context: ./
+  #    dockerfile: control_applications/srsran_read_measurements/Dockerfile
+  #  volumes:
+  #    - ./control_applications/srsran_read_measurements/:/app
+  #    - ./controller_components/ai_nn_controller/:/ai_nn_controller
+  #  ports:
+  #    - "8000:8000"  # Expose FastAPI on port 8001
+  #  networks:
+  #    - aic_network
+  #  environment:
+  #    - PYTHONUNBUFFERED=1
+  #  command: >
+  #    sh -c "sleep 25 && pip install --no-cache-dir /ai_nn_controller && python3 aic_app.py --verbose"
+
+  # FastAPI client interface
+  fastapi_client:
+    container_name: fastapi_client
+    build:
+      context: ./fastapi_client/
+      dockerfile: Dockerfile
+    volumes:
+      - ./fastapi_client/:/app
+    networks:
+      - aic_network
+    depends_on:
+      - aic_server
+    tty: true
+    stdin_open: true
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: "/bin/bash"  # Interactive shell
+
+networks:
+  aic_network:
+    driver: bridge
+  #docker_metrics:
+  #  external: true  # Created by docker/docker-compose.yml (the srsRAN metrics network)

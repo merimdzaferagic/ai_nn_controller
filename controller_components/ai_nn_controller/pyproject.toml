@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai_nn_controller"
+version = "1.0.0"
+description = "ai_nn_controller — A framework for building AI-driven network control applications with MCP integration"
+readme = "README.md"
+license = {text = "AGPL-3.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Merim Dzaferagic"}
+]
+keywords = [
+    "ai-nn",
+    "network-controller",
+    "network-control",
+    "mcp",
+    "ai-controller",
+    "fastapi",
+    "zeromq"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: AGPL-3.0 License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking",
+]
+
+dependencies = [
+    "pyzmq>=25.0.0",
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "pydantic>=2.0.0",
+    "sse-starlette>=1.6.0",
+    "redis>=4.5.0",
+    "requests>=2.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/merimdzaferagic/ai_nn_controller"
+Repository = "https://github.com/merimdzaferagic/ai_nn_controller"
+
+[tool.setuptools]
+py-modules = []
+packages = ["ai_nn_controller", "ai_nn_controller.decorators", "ai_nn_controller.enums", "ai_nn_controller.helpers", "ai_nn_controller.managers", "ai_nn_controller.mcp", "ai_nn_controller.plugins", "ai_nn_controller.protocol", "ai_nn_controller.safety", "ai_nn_controller.arbitration", "ai_nn_controller.observability", "ai_nn_controller.compat"]
+package-dir = {"ai_nn_controller" = "."}
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.conf"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100

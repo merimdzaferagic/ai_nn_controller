@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "control-application-v2-example"
+version = "0.1.0"
+description = "Example v2 control application for ai_nn_controller"
+requires-python = ">=3.9"
+dependencies = ["ai_nn_controller>=1.0.0"]
+
+[project.entry-points."ai_nn_controller.app_init"]
+"control_application_v2_example:aic_app:commands" = "ai_nn_controller.plugins.entrypoints:bootstrap_application_bundle"
+
+[tool.setuptools]
+py-modules = ["aic_app", "commands"]

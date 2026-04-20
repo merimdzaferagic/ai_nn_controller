@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "controlled-entity"
+version = "1.0.0"
+description = "Controlled Entity - A framework for building network nodes for ai_nn_controller"
+license = {text = "AGPL-3.0"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Merim Dzaferagic"}
+]
+keywords = [
+    "ai-nnc",
+    "network-node",
+    "controlled-entity",
+    "zeromq"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking",
+]
+
+dependencies = [
+    "pyzmq>=25.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[tool.setuptools]
+py-modules = []
+packages = ["controlled_entity", "controlled_entity.decorators"]
+package-dir = {"controlled_entity" = "."}
+
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.conf"]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100

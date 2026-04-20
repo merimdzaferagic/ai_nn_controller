@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  aic_app_example:
+    container_name: aic_app_example
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/aic_app_example
+    tty: true
+    stdin_open: true
+    # Run FastAPI server via the launcher script
+    command: bash -c 'sleep 5 && python3 run_server.py'
+    # Expose FastAPI port for external access
+    ports:
+      - "8000:8000"
+    depends_on:
+      - aic_register
+      - ofc_amp1_node
+      - node_msg_broker
+    networks:
+      - aic_network
+    environment:
+      - PYTHONUNBUFFERED=1
+
+networks:
+  aic_network:
+    external: true

@@ -1,0 +1,17 @@
+name: CLA Assistant        # workflow name
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  cla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CLA Assistant Lite    # ✅ step is nested under "steps:"
+        uses: contributor-assistant/github-action@v2.6.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        with:
+          path-to-document: "https://github.com/merimdzaferagic/ai_nn_controller/blob/main/.github/cla/tcd-cla.md"
