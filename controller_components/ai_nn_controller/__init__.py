@@ -15,6 +15,14 @@ from .decorators.agent_controlled import agent_controlled
 from .decorators.aic_app import aic_app
 from .decorators.command_validator import command_validator
 from .managers.AicManager import AicManager
+from .plugin_framework import (
+    AicPlugin,
+    StoragePlugin,
+    ModelRegistryPlugin,
+    MonitoringPlugin,
+    PluginManager,
+    aic_plugin,
+)
 from .plugins import CapabilityMetadata, PluginRegistry
 from .registry import (
     clear_registry,
@@ -54,6 +62,12 @@ __all__ = [
     "get_state_schema",
     "PluginRegistry",
     "CapabilityMetadata",
+    "AicPlugin",
+    "StoragePlugin",
+    "ModelRegistryPlugin",
+    "MonitoringPlugin",
+    "PluginManager",
+    "aic_plugin",
 ]
 
 __version__ = "1.0.0"

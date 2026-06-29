@@ -72,6 +72,10 @@ def aic_app(name):
         cls.agent_requests = deque()
         cls._agent_handlers = {}
 
+        # Per-class plugins dict — populated by AicController at startup
+        # after all plugins have been loaded and validated.
+        cls.plugins = {}
+
         AicManager.add_aic_app(name, cls)
 
         # Create FastAPI router for this app

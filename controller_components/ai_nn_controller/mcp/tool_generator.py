@@ -284,6 +284,22 @@ class MCPToolGenerator:
         return handler
 
     @classmethod
+    def refresh_control_tools(
+        cls,
+        app_name: str,
+        app_class: Type,
+        manager_class: Type
+    ) -> None:
+        """Re-generate control tool schemas after commands have been registered.
+
+        Called by AicController after load_app_entrypoints() so the real
+        command schemas (amp_type, target_gain, etc.) replace the generic
+        fallback schemas that were baked in at @aic_app decoration time.
+        """
+        for tool in cls._generate_control_tools(app_name, app_class, manager_class):
+            MCPToolRegistry.register_tool(tool)
+
+    @classmethod
     def _generate_agent_tools(
         cls,
         app_name: str,

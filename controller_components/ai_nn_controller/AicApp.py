@@ -80,6 +80,14 @@ class AicApp:
     read_measurements = {}
     control_functions = {}
 
+    # Declare plugin dependencies by name.  The controller validates that every
+    # listed plugin is registered at startup and injects live references into
+    # cls.plugins before the first process() call.
+    required_plugins: list = []
+
+    # Populated by AicController.__aic_app_setup — do not set manually.
+    plugins: dict = {}
+
     @classmethod
     def add_command(cls, command):
         """

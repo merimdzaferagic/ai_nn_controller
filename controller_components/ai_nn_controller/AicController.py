@@ -21,7 +21,9 @@ from .decorators.command_validator import validate_command
 from .enums import *
 from .helpers.Validator import Validator
 from .managers.AicManager import AicManager
+from .mcp.tool_generator import MCPToolGenerator
 from .observability import structured_log
+from .plugin_framework import PluginManager, load_plugin_entrypoints, validate_app_plugins
 from .plugins import CapabilityMetadata, PluginRegistry, load_app_entrypoints
 from .protocol import MessageEnvelope, decode_message, encode_message
 from .registry import execute_command, has_command
@@ -49,12 +51,29 @@ class AicController:
         self.topics = []
         self.message_queue = {}
 
-        # Packaging-native plugin init: discover app hooks from entry points
+        # Plugins must load before apps so required_plugins can be validated.
+        load_plugin_entrypoints()
         load_app_entrypoints()
+
+        # Refresh MCP control-tool schemas now that register_specific_commands()
+        # has run. The @aic_app decorator generates tools at import time before
+        # commands are registered, so schemas fall back to the generic
+        # {node_id, payload} shape. Re-generating here replaces those fallbacks
+        # with the real per-field schemas (amp_type, target_gain, etc.).
+        for app_name, app_class in AicManager.aic_apps.items():
+            MCPToolGenerator.refresh_control_tools(app_name, app_class, AicManager)
 
         AicManager.set_controller(self)
         for aic_app in AicManager.aic_apps.values():
             Validator.validate_aic_app(aic_app)
+            validate_app_plugins(aic_app)
+
+        # Connect every loaded plugin now that validation passed.
+        for plugin_name, plugin_class in PluginManager.all_plugins().items():
+            try:
+                plugin_class.connect()
+            except Exception as exc:
+                vprint(f"[AicController] Plugin '{plugin_name}' connect() failed: {exc}")
 
         PluginRegistry.register(CapabilityMetadata(
             name="AicController",
@@ -62,6 +81,15 @@ class AicController:
             capabilities=["v2"],
             extra={"max_queue": self.max_queue_size},
         ))
+
+        # Register each loaded plugin in the capability catalogue.
+        for plugin_name, plugin_class in PluginManager.all_plugins().items():
+            PluginRegistry.register(CapabilityMetadata(
+                name=plugin_name,
+                plugin_type="plugin",
+                capabilities=[],
+                extra={"plugin_type": getattr(plugin_class, "plugin_type", "generic")},
+            ))
 
         register_aic_app_inst = RegisterAicApp()
         for aic_app in AicManager.aic_apps.values():
@@ -158,6 +186,11 @@ class AicController:
                 capabilities=command_capabilities,
                 extra={"cell_ids": list(temp_aic_app.cell_ids)},
             ))
+            # Inject live plugin references so process() can call cls.plugins["Name"]
+            aic_app.plugins = {
+                p: PluginManager.get(p)
+                for p in getattr(aic_app, "required_plugins", [])
+            }
         self.topics = list(set(self.topics))
 
     def _fail_pending_agent_requests(self, app_name: str, reason: str):
@@ -369,6 +402,11 @@ class AicController:
 
     def shutdown(self):
         self.stop_event.set()
+        for plugin_name, plugin_class in PluginManager.all_plugins().items():
+            try:
+                plugin_class.disconnect()
+            except Exception as exc:
+                vprint(f"[AicController] Plugin '{plugin_name}' disconnect() error: {exc}")
         try:
             if hasattr(self, "consumer"):
                 self.consumer.close(0)

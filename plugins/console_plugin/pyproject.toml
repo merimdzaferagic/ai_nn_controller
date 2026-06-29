@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "console-plugin"
+version = "0.1.0"
+description = "Console logging plugin for ai_nn_controller — reference plugin implementation"
+requires-python = ">=3.9"
+dependencies = ["ai_nn_controller>=1.0.0"]
+
+[project.entry-points."ai_nn_controller.plugin_init"]
+"console_plugin:aic_plugin" = "ai_nn_controller.plugin_framework.entrypoints:bootstrap_plugin_bundle"
+
+[tool.setuptools]
+py-modules = ["aic_plugin"]

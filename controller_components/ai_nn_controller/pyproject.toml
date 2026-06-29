@@ -59,7 +59,7 @@ Repository = "https://github.com/merimdzaferagic/ai_nn_controller"
 
 [tool.setuptools]
 py-modules = []
-packages = ["ai_nn_controller", "ai_nn_controller.decorators", "ai_nn_controller.enums", "ai_nn_controller.helpers", "ai_nn_controller.managers", "ai_nn_controller.mcp", "ai_nn_controller.plugins", "ai_nn_controller.protocol", "ai_nn_controller.safety", "ai_nn_controller.arbitration", "ai_nn_controller.observability", "ai_nn_controller.compat"]
+packages = ["ai_nn_controller", "ai_nn_controller.decorators", "ai_nn_controller.enums", "ai_nn_controller.helpers", "ai_nn_controller.managers", "ai_nn_controller.mcp", "ai_nn_controller.plugin_framework", "ai_nn_controller.plugins", "ai_nn_controller.protocol", "ai_nn_controller.safety", "ai_nn_controller.arbitration", "ai_nn_controller.observability", "ai_nn_controller.compat"]
 package-dir = {"ai_nn_controller" = "."}
 
 [tool.setuptools.package-data]

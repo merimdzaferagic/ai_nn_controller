@@ -186,6 +186,11 @@ services:
   # AIC Application Server with FastAPI
   # Runs aic_app.py which starts the controller with API via with_api=True
   # Uses the new registry-based command system and ai_nn_controller package
+  #
+  # Plugin installation order: framework → plugins → app
+  # Plugins are Python packages loaded inside this process (not separate containers).
+  # For plugins that also expose an external service (e.g. MLflow, InfluxDB), add
+  # a dedicated service entry below and point the plugin at it via environment vars.
   aic_server:
     container_name: aic_server
     build:
@@ -194,6 +199,7 @@ services:
     volumes:
       - ./control_applications/control_application_v2_example/:/app
       - ./controller_components/ai_nn_controller/:/ai_nn_controller
+      - ./plugins/console_plugin/:/console_plugin
     ports:
       - "8000:8000"  # Expose FastAPI on port 8000
     networks:
@@ -201,7 +207,11 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     command: >
-      sh -c "sleep 25 && pip install --no-cache-dir /ai_nn_controller && pip install --no-cache-dir /app && python3 aic_app.py --verbose"
+      sh -c "sleep 25
+      && pip install --no-cache-dir /ai_nn_controller
+      && pip install --no-cache-dir /console_plugin
+      && pip install --no-cache-dir /app
+      && python3 aic_app.py --verbose"
 
   # FastAPI client interface
   fastapi_client:

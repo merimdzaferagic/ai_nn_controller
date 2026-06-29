@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from importlib import import_module
 from importlib.metadata import entry_points
@@ -62,7 +63,15 @@ def bootstrap_application_bundle(ep=None) -> None:
     except Exception as exc:
         vprint(f"[PluginEntrypoints] Command bootstrap warning for {bundle_name}: {exc}")
 
-    import_module(app_module_name)
+    # Guard against re-importing a module that is already running as __main__.
+    # When the user runs `python3 aic_app.py`, the module lives in sys.modules
+    # as "__main__" but not yet under its real name.  Calling import_module()
+    # on it would trigger a second import, re-running all @aic_app decorators
+    # and raising RuntimeError("An aic_app with that name already exists.").
+    main = sys.modules.get("__main__")
+    main_spec_name = getattr(getattr(main, "__spec__", None), "name", None)
+    if app_module_name not in sys.modules and main_spec_name != app_module_name:
+        import_module(app_module_name)
 
     new_apps = sorted(set(AicManager.aic_apps.keys()) - existing_apps)
 

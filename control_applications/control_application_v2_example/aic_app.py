@@ -23,9 +23,17 @@ class NetworkControlApp(AicApp):
     Reads measurements from all optical nodes (Amp1–3, ROADM1–3) and sends
     periodic SET_GAIN commands to ROADM3. Conflict resolution is handled by
     the framework's CommandArbitrator (AIC_ARBITRATION_STRATEGY env var).
+
+    Demonstrates plugin usage: ConsolePlugin is declared as a required plugin.
+    If the console-plugin package is not installed the controller will refuse
+    to start and print a clear error listing the missing plugin.
+    Install it with: pip install -e plugins/console_plugin/
     """
     aic_app_id = 1
     control_loop_update_time = 2
+
+    # Declare plugin dependencies — the controller validates these at startup.
+    required_plugins = ["ConsolePlugin"]
 
     read_measurements = {
         3: ["session_id", "amp1_target_gain", "amp1_gain_tilt", "amp1_target_power", "amp1_control_mode"],
@@ -99,7 +107,13 @@ class NetworkControlApp(AicApp):
 
     @classmethod
     def process(cls, measurements):
-        print(f"[NetworkApp1] Processing at {time.time():.2f}")
+        console = cls.plugins.get("ConsolePlugin")
+
+        if console:
+            console.log_event("process_tick", app="NetworkApp1", t=f"{time.time():.2f}")
+        else:
+            print(f"[NetworkApp1] Processing at {time.time():.2f}")
+
         if not measurements:
             return
 
@@ -107,13 +121,18 @@ class NetworkControlApp(AicApp):
                                 (6, "Amp3"), (7, "ROADM2"), (8, "ROADM3")]:
             latest = measurements.get(node_id, [None])[-1] if measurements.get(node_id) else None
             if latest:
-                print(f"  [{label}] {latest}")
+                if console:
+                    console.log_measurement(node_id, latest)
+                else:
+                    print(f"  [{label}] {latest}")
 
         cls.command_counter += 1
         if cls.command_counter >= 5:
             cls.command_counter = 0
-            print("[NetworkApp1] Sending SET_GAIN to ROADM3 (node 8, preamp, gain=10)")
-            cls.add_command(("SET_GAIN", {"node_id": 8, "value": {"amp_type": "preamp", "target_gain": 10}}))
+            payload = {"node_id": 8, "value": {"amp_type": "preamp", "target_gain": 10}}
+            if console:
+                console.log_command("SET_GAIN", payload)
+            cls.add_command(("SET_GAIN", payload))
 
 
 @aic_app(name="NetworkApp2")
