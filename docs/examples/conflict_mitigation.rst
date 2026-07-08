@@ -17,6 +17,16 @@ The pattern uses three apps defined in the same ``aic_app.py`` file:
   dispatches them, detects conflicts, and re-queues only the winning command via its own
   ``cls.add_command()``.
 
+.. note::
+
+   This exact pattern ships today in
+   ``control_applications/control_application_v2_example/aic_app.py`` as
+   ``NetworkApp1``, ``NetworkApp2``, and ``ConflictMitigatorApp``. The doc below shows a
+   simplified two-app teaching version; the real ``NetworkApp1`` additionally declares
+   ``required_plugins = ["ConsolePlugin"]`` (see :doc:`plugin_example` and
+   :doc:`../user_guide/developing_plugins`) and an ``@agent_controlled`` operation
+   (``optimize_gain``), both omitted here for clarity.
+
 .. code-block:: text
 
    ┌──────────────┐    ┌──────────────┐
@@ -253,6 +263,11 @@ apps' commands are still in their deques.
 ``AicController.process_commands()`` and therefore through ``SafetyPolicyEngine`` and
 ``CommandArbitrator`` as normal. The ConflictMitigator adds an app-level policy layer
 on top of, not instead of, the framework's built-in mechanisms.
+
+**Matches the shipped example**: as noted above, this is the live pattern used in
+``control_applications/control_application_v2_example/aic_app.py`` — the real
+``NetworkApp1``/``NetworkApp2``/``ConflictMitigatorApp`` trio, plus a plugin dependency
+and an agent-controlled operation not shown in this simplified walkthrough.
 
 Alternative Resolution Strategies
 ----------------------------------

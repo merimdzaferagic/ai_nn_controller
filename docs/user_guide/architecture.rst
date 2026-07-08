@@ -226,6 +226,49 @@ The execution engine that handles all northbound communication:
 This separation means node developers only write southbound logic, while the
 framework handles all framework-facing communication.
 
+Plugin System
+-------------
+
+``ai_nn_controller`` has two distinct, complementary subsystems that both
+live under a "plugin"-sounding name:
+
+- ``plugin_framework`` — **runtime service plugins**. An ``AicPlugin``
+  subclass gives control applications typed access to an external service
+  (storage, model registry, monitoring). Apps declare a dependency via
+  ``required_plugins`` and call methods on it via ``cls.plugins["Name"]``.
+- ``plugins`` — a **capability-discovery metadata registry** plus the
+  control-application entry-point loader. It catalogues the controller,
+  every loaded app, every loaded runtime plugin, and every app bundle for
+  introspection, and is also where ``bootstrap_application_bundle`` (the
+  ``ai_nn_controller.app_init`` entry-point hook) lives.
+
+Both runtime plugins and control applications ship as independent, pip
+installable packages and are discovered via Python entry points, not by
+editing the framework. At startup, ``AicController.__init__`` performs this
+sequence:
+
+.. code-block:: text
+
+   1. load_plugin_entrypoints()   — discover & import every ai_nn_controller.plugin_init
+                                     package, running @aic_plugin decorators
+   2. load_app_entrypoints()      — discover & import every ai_nn_controller.app_init
+                                     package, running @aic_app decorators and
+                                     registering commands
+   3. validate_app_plugins(app)   — for each app, verify every name in
+                                     required_plugins was registered in step 1;
+                                     raises RuntimeError otherwise
+   4. plugin.connect() for every loaded plugin
+
+Plugins load before apps precisely so that an app's ``required_plugins`` can
+be validated before it starts processing. Every app, plugin, and app bundle
+is also registered into ``PluginRegistry`` as it loads; call
+``AicController.discover_capabilities()`` to retrieve the full catalogue at
+runtime.
+
+See :doc:`developing_plugins` for how to write a plugin, and
+:doc:`../api/plugin_framework` / :doc:`../api/plugins` for the full API
+reference of each subsystem.
+
 Communication Flows
 -------------------
 
@@ -319,5 +362,6 @@ Next Steps
 
 - :doc:`developing_apps` — Create your own control applications
 - :doc:`developing_nodes` — Build network nodes with the controlled_entity framework
+- :doc:`developing_plugins` — Write reusable plugins for external services
 - :doc:`commands` — Define custom commands
 - :doc:`../api/ai_nn_controller` — Core framework API reference

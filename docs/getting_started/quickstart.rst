@@ -14,16 +14,18 @@ Start the infrastructure using Docker Compose:
 
 .. code-block:: bash
 
-   docker-compose up -d
+   docker compose up -d
 
-This starts Redis, the registration service, the message broker, and the example
-optical network nodes.
+This starts Redis, the registration service, the message broker, the six example
+optical network nodes, and the ``aic_server`` container, which runs three
+cooperating example applications by default: ``NetworkApp1``, ``NetworkApp2``,
+and ``ConflictMitigator`` (see :doc:`../examples/conflict_mitigation`).
 
 Verify services are running:
 
 .. code-block:: bash
 
-   docker-compose ps
+   docker compose ps
    curl http://localhost:8000/health
 
 Accessing the API
@@ -46,7 +48,7 @@ List All Applications
 
    curl http://localhost:8000/apps
 
-Response:
+Response — the default ``aic_server`` container runs three apps out of the box:
 
 .. code-block:: json
 
@@ -58,10 +60,30 @@ Response:
          "aic_app_id": 1,
          "cell_ids": [3, 4, 5, 6, 7, 8],
          "control_loop_update_time": 2
+       },
+       {
+         "name": "NetworkApp2",
+         "state": "stopped",
+         "aic_app_id": 2,
+         "cell_ids": [3, 8],
+         "control_loop_update_time": 2
+       },
+       {
+         "name": "ConflictMitigator",
+         "state": "stopped",
+         "aic_app_id": 3,
+         "cell_ids": [8],
+         "control_loop_update_time": 2
        }
      ],
-     "total": 1
+     "total": 3
    }
+
+``NetworkApp1`` and ``NetworkApp2`` both periodically send ``SET_GAIN`` to node
+8, which is why ``ConflictMitigator`` exists — it resolves the conflict by
+priority and re-queues only the winning command. ``NetworkApp1`` also declares
+``required_plugins = ["ConsolePlugin"]``; see :doc:`../user_guide/developing_plugins`.
+See :doc:`../examples/conflict_mitigation` for the full pattern.
 
 Start an Application
 ~~~~~~~~~~~~~~~~~~~~
@@ -187,20 +209,20 @@ Viewing Logs
 .. code-block:: bash
 
    # All services
-   docker-compose logs -f
+   docker compose logs -f
 
    # Specific service
-   docker-compose logs -f aic_server
+   docker compose logs -f aic_server
 
    # Message broker (see measurements/commands flow)
-   docker-compose logs -f node_msg_broker
+   docker compose logs -f node_msg_broker
 
 Stopping Services
 -----------------
 
 .. code-block:: bash
 
-   docker-compose down
+   docker compose down
 
 Next Steps
 ----------

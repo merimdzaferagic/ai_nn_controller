@@ -242,4 +242,3 @@ Configuration
    recv_commands = 5556
    pub_commands = 5557
    register_sub = 5558
-   register_pub = 5559
