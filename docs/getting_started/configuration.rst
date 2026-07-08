@@ -66,6 +66,13 @@ and injects the values into ``self.config`` on the node instance.
    # Unique node identifier — must not conflict with other nodes
    node_id = 3
 
+**Commonly-set optional key**:
+
+.. code-block:: ini
+
+   # Port this node publishes measurements on (varies per node)
+   pub_port = 5562
+
 **Optional / custom keys** — add any key-value pairs your node needs:
 
 .. code-block:: ini

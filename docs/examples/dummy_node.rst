@@ -60,6 +60,9 @@ The simplest node only publishes measurements. This is the complete code from
    node_id = 3
    pub_port = 5562
 
+``pub_port`` is one of the recognized optional ``node.conf`` keys — see
+:doc:`../getting_started/configuration` for the full list.
+
 **Dockerfile**:
 
 .. code-block:: dockerfile
@@ -147,14 +150,14 @@ Start the full stack with Docker Compose:
 
 .. code-block:: bash
 
-   docker-compose up -d
+   docker compose up -d
 
 This starts the infrastructure (Redis, register, broker) and all dummy nodes. Verify
 they registered:
 
 .. code-block:: bash
 
-   docker-compose logs aic_register
+   docker compose logs aic_register
 
 You should see lines like:
 

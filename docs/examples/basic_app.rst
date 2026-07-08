@@ -100,7 +100,7 @@ Running the Example
 
    .. code-block:: bash
 
-      docker-compose up -d redis aic_register node_msg_broker amp1_node
+      docker compose up -d redis aic_register node_msg_broker amp1_node
 
 2. Run the application:
 

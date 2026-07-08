@@ -147,7 +147,7 @@ AicController
    4. Scans for @command_validator decorated methods
    5. Scans for @agent_controlled decorated methods
    6. Auto-derives ``cell_ids`` from ``read_measurements`` and ``control_functions`` keys
-   7. Auto-initializes ``send_commands`` as an empty list
+   7. Auto-initializes ``send_commands`` as an empty ``deque``
    8. Initializes ``agent_requests`` queue and ``_agent_handlers`` map
 
    Example::
@@ -436,3 +436,29 @@ Configuration
       :classmethod:
 
       Enable or disable verbose logging.
+
+Related Subpackages
+--------------------
+
+The framework ships several smaller subpackages that back features described
+elsewhere in these docs. They're listed here as an index rather than
+documented in full, since each is small and already covered in context:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Subpackage
+     - Purpose
+   * - ``ai_nn_controller.protocol``
+     - ``MessageEnvelope`` — the wire format used for every measurement and command sent over ZeroMQ (schema, version, correlation/lineage/idempotency IDs, payload). See :doc:`../user_guide/architecture` and :doc:`broker`.
+   * - ``ai_nn_controller.safety``
+     - ``SafetyPolicyEngine`` — a global command blocklist enforced on every manual and app-issued command before it is sent. See :doc:`../examples/conflict_mitigation`.
+   * - ``ai_nn_controller.arbitration``
+     - ``CommandArbitrator`` — resolves duplicate/conflicting commands to the same node using a configurable strategy (``last_write_wins`` or ``min_gap``, set via ``AIC_ARBITRATION_STRATEGY``). See :doc:`../examples/conflict_mitigation`.
+   * - ``ai_nn_controller.observability``
+     - ``structured_log`` — emits JSON-formatted log lines for key lifecycle events (measurement ingress, command egress, queue backpressure, agent request draining).
+   * - ``ai_nn_controller.plugin_framework``
+     - Runtime service plugins (``AicPlugin``, ``required_plugins``). See :doc:`plugin_framework`.
+   * - ``ai_nn_controller.plugins``
+     - Capability-discovery registry and the control-application entry-point loader. See :doc:`plugins`.

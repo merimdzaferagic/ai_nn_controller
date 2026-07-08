@@ -191,7 +191,7 @@ Running
 .. code-block:: bash
 
    # Start infrastructure
-   docker-compose up -d
+   docker compose up -d
 
    # Run the application
    python multi_node_app.py --verbose

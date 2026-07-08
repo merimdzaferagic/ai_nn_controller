@@ -20,7 +20,8 @@ Getting Started
 
       python -m venv venv
       source venv/bin/activate
-      pip install -e controller_components/ai_nn_controller[dev]
+      cd controller_components/ai_nn_controller
+      pip install -e ".[dev]"
 
 4. Create a branch for your changes:
 
@@ -87,9 +88,9 @@ Testing
 
   .. code-block:: bash
 
-     docker-compose up -d
+     docker compose up -d
      # Run your tests
-     docker-compose down
+     docker compose down
 
 Pull Request Process
 --------------------

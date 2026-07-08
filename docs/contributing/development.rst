@@ -47,7 +47,7 @@ Start infrastructure services:
 
 .. code-block:: bash
 
-   docker-compose up -d redis aic_register node_msg_broker
+   docker compose up -d redis aic_register node_msg_broker
 
 Run the example application locally:
 
@@ -153,8 +153,8 @@ View Docker logs:
 
 .. code-block:: bash
 
-   docker-compose logs -f aic_server
-   docker-compose logs -f node_msg_broker
+   docker compose logs -f aic_server
+   docker compose logs -f node_msg_broker
 
 Common Issues
 -------------
@@ -165,7 +165,7 @@ Ensure infrastructure is running:
 
 .. code-block:: bash
 
-   docker-compose ps
+   docker compose ps
 
 **Import Errors**
 
@@ -173,7 +173,8 @@ Install the framework:
 
 .. code-block:: bash
 
-   pip install -e controller_components/ai_nn_controller
+   cd controller_components/ai_nn_controller
+   pip install -e .
 
 **Port Conflicts**
 

@@ -22,6 +22,7 @@ and more. Key features:
 - **Declarative App Definition**: Define control apps with simple Python decorators
 - **Automatic API Generation**: FastAPI REST endpoints auto-generated for each app
 - **MCP Tool Generation**: AI agents (like Claude) can control apps via auto-generated MCP tools
+- **Plugin System**: Reusable, installable plugins give control apps typed access to external services (storage, model registries, monitoring)
 - **Distributed Architecture**: Nodes, register, and message broker communicate via ZeroMQ
 - **Dynamic Discovery**: Nodes and apps only need to know the register address
 
@@ -72,6 +73,7 @@ User Guide
    user_guide/architecture
    user_guide/developing_apps
    user_guide/developing_nodes
+   user_guide/developing_plugins
    user_guide/commands
    user_guide/docker
 
@@ -83,6 +85,8 @@ API Reference
    :caption: API Reference
 
    api/ai_nn_controller
+   api/plugin_framework
+   api/plugins
    api/register
    api/broker
    api/rest_api
@@ -99,6 +103,7 @@ Examples
    examples/dummy_node
    examples/multi_node_monitoring
    examples/conflict_mitigation
+   examples/plugin_example
    examples/srsran_integration
 
 Contributing

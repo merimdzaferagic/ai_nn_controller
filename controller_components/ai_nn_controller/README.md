@@ -155,7 +155,32 @@ class SmartApp(AicApp):
 
 This generates an MCP tool `SmartApp_optimize_gain`. The app must be `running` for the tool to work.
 
-### 5. Run Your Application
+### 5. Declare Plugin Dependencies (Optional)
+
+Apps can depend on reusable service plugins (e.g. storage, model registry, monitoring
+adapters) built with the `plugin_framework` subpackage. Declare a dependency via
+`required_plugins`; the controller validates it at startup and refuses to run if the
+plugin isn't installed.
+
+```python
+from ai_nn_controller import AicApp, aic_app
+
+@aic_app(name="MyNetworkApp")
+class MyNetworkApp(AicApp):
+    required_plugins = ["ConsolePlugin"]
+
+    @classmethod
+    def process(cls, measurements):
+        console = cls.plugins.get("ConsolePlugin")
+        if console:
+            console.log_event("process_tick")
+```
+
+See `docs/user_guide/developing_plugins.rst` for the full guide on writing and
+registering a plugin, and the repo-root `AGENT.md` for the complete
+plugin-authoring workflow.
+
+### 6. Run Your Application
 
 ```bash
 python my_app.py

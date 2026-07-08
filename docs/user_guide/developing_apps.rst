@@ -138,7 +138,7 @@ Stop the original stack, then start the test stack:
 .. code-block:: bash
 
    docker compose down
-   docker-compose -f docker-compose-test.yml up --build
+   docker compose -f docker-compose-test.yml up --build
 
 This brings up only the registered nodes and the new ``template_app``.
 
@@ -460,6 +460,40 @@ Edge Cases
 - **Handler exception**: Caught by the controller, error returned to MCP caller
 - **App stopped while request pending**: All pending requests are drained with an error
 
+Declaring Plugin Dependencies (Optional)
+-------------------------------------------
+
+Control applications can depend on **plugins** — reusable, independently
+installable packages that provide typed access to external services (a
+time-series database, an ML model registry, a monitoring backend, etc.).
+Declare a dependency with ``required_plugins`` and access the loaded plugin
+through ``cls.plugins``:
+
+.. code-block:: python
+
+   from ai_nn_controller.decorators.aic_app import aic_app
+   from ai_nn_controller.AicApp import AicApp
+
+   @aic_app(name="MonitoredApp")
+   class MonitoredApp(AicApp):
+       required_plugins = ["ConsolePlugin"]
+       read_measurements = {3: ["gain", "power"]}
+       control_functions = {}
+
+       @classmethod
+       def process(cls, measurements):
+           console = cls.plugins["ConsolePlugin"]
+           latest = measurements.get(3, [{}])[-1]
+           console.log_measurement(3, latest)
+
+``cls.plugins`` is populated by ``AicController`` at startup, after all
+plugin and app entry points have loaded. If a plugin listed in
+``required_plugins`` isn't installed (or wasn't registered via the
+``ai_nn_controller.plugin_init`` entry-point group), the controller refuses
+to start the app and raises ``RuntimeError`` naming the missing plugin.
+
+See :doc:`developing_plugins` for details on writing your own plugin.
+
 State Variables
 ---------------
 
@@ -663,6 +697,7 @@ Next Steps
 ----------
 
 - :doc:`developing_nodes` - Build network nodes with the controlled_entity framework
+- :doc:`developing_plugins` - Write reusable plugins for external services
 - :doc:`commands` - Define custom commands
 - :doc:`../api/ai_nn_controller` - Full API reference
 - :doc:`../examples/basic_app` - More examples

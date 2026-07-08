@@ -34,18 +34,22 @@ The easiest way to run the complete framework is using Docker Compose:
    cd ai_nn_controller
 
    # Start all services
-   docker-compose up -d
+   docker compose up -d
 
    # Verify services are running
-   docker-compose ps
+   docker compose ps
 
 This starts:
 
-- **Redis** (port 6379): State storage
+- **Redis** (port 6379, ``redis:7-alpine``): State storage
 - **aic_register** (port 5558): Registration service
 - **node_msg_broker** (ports 5554-5557): Message routing
-- **aic_server** (port 8000): FastAPI + MCP server
-- **Network nodes**: Simulated optical devices
+- **6 simulated optical nodes**: ``amp1_node``, ``roadm1_node``, ``amp2_node``,
+  ``amp3_node``, ``roadm2_node``, ``roadm3_node``
+- **aic_server** (port 8000): FastAPI + MCP server, running three example
+  applications (``NetworkApp1``, ``NetworkApp2``, ``ConflictMitigator``) by
+  default — see :doc:`../examples/conflict_mitigation`
+- **fastapi_client**: interactive CLI client container
 
 Method 2: Local Development
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
